@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreshTeacher — Конструктор заданий</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800;900&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════
+   TOKENS
+══════════════════════════════════════ */
+:root {
+  --bg:        #fdf6f0;
+  --surface:   #fff9f5;
+  --card:      #ffffff;
+  --border:    #e8d8cc;
+  --border2:   #f0e4da;
+
+  --red:       #d63d2f;
+  --red-d:     #b32d22;
+  --red-soft:  #f5e8e6;
+  --red-mid:   #e8c0bb;
+
+  --beige:     #f2e4d4;
+  --beige2:    #e8d5c0;
+  --beige3:    #cdb89a;
+
+  --text:      #2d1a14;
+  --text-mid:  #6b4136;
+  --text-muted:#a07060;
+
+  --green:     #2d9e6b;
+  --gold:      #c9860a;
+
+  /* tab accent colours */
+  --c-read:    #2563c4;
+  --c-write:   #7c3aed;
+  --c-vocab:   #d63d2f;
+  --c-gram:    #0f8a5f;
+  --c-speak:   #c9860a;
+
+  --radius:    16px;
+  --radius-sm: 10px;
+  --shadow:    0 2px 14px rgba(180,80,60,.09);
+  --shadow-lg: 0 8px 30px rgba(180,80,60,.15);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+/* ══════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════ */
+.app{display:grid;grid-template-columns:360px 1fr;min-height:100vh}
+
+/* ══════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════ */
+.sidebar{
+  background:var(--surface);
+  border-right:2px solid var(--border);
+  height:100vh;
+  position:sticky;top:0;
+  overflow-y:auto;
+  display:flex;flex-direction:column;
+}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+.sb-header{
+  padding:22px 22px 16px;
+  border-bottom:2px solid var(--border);
+  background:linear-gradient(135deg,#fff9f5,#fdf0e8);
+  position:relative;overflow:hidden;
+}
+.sb-header::after{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:140px;height:140px;
+  background:radial-gradient(circle,rgba(214,61,47,.1) 0%,transparent 70%);
+  border-radius:50%;pointer-events:none;
+}
+
+.logo-row{display:flex;align-items:center;gap:11px;margin-bottom:5px}
+.logo-icon{
+  width:40px;height:40px;background:var(--red);border-radius:11px;
+  display:grid;place-items:center;font-size:18px;
+  box-shadow:0 3px 10px rgba(214,61,47,.35);flex-shrink:0;
+}
+.logo-name{font-family:'Unbounded',sans-serif;font-size:17px;font-weight:900;color:var(--red);line-height:1}
+.logo-sub{font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--text-muted);margin-top:2px}
+.sb-tagline{font-size:12px;color:var(--text-muted);font-weight:600}
+
+.sb-section{padding:16px 20px;border-bottom:1px solid var(--border2)}
+
+.sb-sec-title{
+  font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.sb-sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+label{
+  display:block;font-size:12px;font-weight:700;
+  color:var(--text-mid);margin-bottom:4px;margin-top:11px;
+}
+label:first-of-type{margin-top:0}
+
+input[type=text],textarea,select{
+  width:100%;background:var(--card);
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text);font-family:'Nunito',sans-serif;
+  font-size:13px;padding:8px 12px;
+  transition:border-color .2s,box-shadow .2s;outline:none;appearance:none;
+}
+input[type=text]:focus,textarea:focus,select:focus{
+  border-color:var(--red);box-shadow:0 0 0 3px rgba(214,61,47,.12);
+}
+textarea{resize:vertical;min-height:62px;line-height:1.5}
+
+/* language pills */
+.lang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.lang-pill{
+  cursor:pointer;border:1.5px solid var(--border);border-radius:9px;
+  padding:6px 3px;text-align:center;font-size:10.5px;font-weight:700;
+  background:var(--card);color:var(--text-muted);
+  transition:all .18s;user-select:none;line-height:1.3;
+}
+.lang-pill:hover{border-color:var(--red);color:var(--red);background:var(--red-soft)}
+.lang-pill.active{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+.lang-pill .flag{font-size:16px;display:block;margin-bottom:2px}
+.lang-custom{display:none;margin-top:7px}
+.lang-custom.on{display:block}
+
+/* ══════════════════════════════════════
+   MAIN
+══════════════════════════════════════ */
+.main{padding:26px 30px;overflow-y:auto;min-width:0}
+
+/* skill tabs */
+.skill-tabs{
+  display:flex;gap:0;
+  background:var(--card);
+  border:1.5px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  margin-bottom:26px;
+  box-shadow:var(--shadow);
+}
+
+.skill-tab{
+  flex:1;border:none;background:transparent;
+  font-family:'Nunito',sans-serif;font-size:12.5px;font-weight:800;
+  padding:12px 4px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--text-muted);
+  border-right:1px solid var(--border);
+  transition:all .2s;position:relative;
+}
+.skill-tab:last-child{border-right:none}
+.skill-tab .t-icon{font-size:20px;line-height:1}
+.skill-tab:hover{background:var(--beige);color:var(--text)}
+
+.skill-tab.active{color:white}
+.skill-tab[data-tab=reading].active{background:var(--c-read)}
+.skill-tab[data-tab=writing].active{background:var(--c-write)}
+.skill-tab[data-tab=vocab].active{background:var(--c-vocab)}
+.skill-tab[data-tab=grammar].active{background:var(--c-gram)}
+.skill-tab[data-tab=speaking].active{background:var(--c-speak)}
+
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* section within tab */
+.tasks-section-title{
+  font-family:'Unbounded',sans-serif;font-size:11px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.1em;
+  color:var(--text-muted);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.tasks-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* task cards grid */
+.tasks-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:14px;
+  margin-bottom:30px;
+}
+
+/* task card */
+.task-card{
+  background:var(--card);
+  border:1.5px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  transition:box-shadow .2s,border-color .2s;
+}
+.task-card:hover{box-shadow:var(--shadow-lg)}
+
+.tc-head{
+  padding:16px 16px 10px;
+  display:flex;align-items:flex-start;gap:12px;
+}
+.tc-icon{
+  font-size:28px;width:46px;height:46px;
+  background:var(--beige);border:1.5px solid var(--border);
+  border-radius:12px;display:grid;place-items:center;flex-shrink:0;
+}
+.tc-meta{}
+.tc-name{
+  font-family:'Unbounded',sans-serif;font-size:11.5px;font-weight:700;
+  color:var(--text);margin-bottom:4px;line-height:1.35;
+}
+.tc-badge{
+  font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;
+  display:inline-block;
+}
+
+/* badge colours by tab */
+.badge-reading{background:#deeaff;color:var(--c-read);border:1px solid #b3ccf5}
+.badge-writing{background:#ede9ff;color:var(--c-write);border:1px solid #c4b5fd}
+.badge-vocab  {background:var(--red-soft);color:var(--red);border:1px solid var(--red-mid)}
+.badge-grammar{background:#d4f5e9;color:var(--c-gram);border:1px solid #86dcbc}
+.badge-speaking{background:#fff3d4;color:var(--c-speak);border:1px solid #f0ce7a}
+
+.tc-desc{
+  padding:0 16px 14px;font-size:12px;
+  color:var(--text-muted);line-height:1.55;font-weight:600;
+}
+
+/* generate button inside card */
+.tc-footer{
+  padding:0 14px 14px;
+}
+.btn-gen{
+  width:100%;border:none;border-radius:9px;
+  font-family:'Nunito',sans-serif;font-size:12.5px;font-weight:800;
+  padding:9px 0;cursor:pointer;
+  transition:all .18s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-gen-reading{background:var(--c-read);color:white}
+.btn-gen-writing{background:var(--c-write);color:white}
+.btn-gen-vocab  {background:var(--red);color:white}
+.btn-gen-grammar{background:var(--c-gram);color:white}
+.btn-gen-speaking{background:var(--c-speak);color:white}
+.btn-gen:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+/* prompt overlay */
+.prompt-overlay{
+  position:fixed;inset:0;background:rgba(45,26,20,.55);
+  z-index:100;display:none;
+  align-items:center;justify-content:center;
+  padding:24px;
+}
+.prompt-overlay.open{display:flex}
+
+.prompt-modal{
+  background:var(--card);border-radius:20px;
+  width:100%;max-width:780px;max-height:88vh;
+  display:flex;flex-direction:column;
+  box-shadow:0 24px 80px rgba(45,26,20,.35);
+  overflow:hidden;
+}
+
+.pm-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 22px;background:var(--beige);
+  border-bottom:1.5px solid var(--border);
+  flex-shrink:0;
+}
+.pm-title{
+  font-family:'Unbounded',sans-serif;font-size:13px;font-weight:800;
+  color:var(--text);display:flex;align-items:center;gap:10px;
+}
+.pm-actions{display:flex;gap:8px;align-items:center}
+
+.pm-body{
+  padding:22px 24px;overflow-y:auto;flex:1;
+  font-size:13.5px;line-height:1.75;white-space:pre-wrap;
+  color:var(--text);font-family:'Nunito',sans-serif;
+}
+.pm-body::-webkit-scrollbar{width:4px}
+.pm-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+.btn-close{
+  width:34px;height:34px;border:1.5px solid var(--border);
+  border-radius:9px;background:var(--card);
+  font-size:15px;cursor:pointer;
+  display:grid;place-items:center;
+  color:var(--text-muted);transition:all .18s;
+}
+.btn-close:hover{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+
+.btn-copy-pm{
+  border:1.5px solid var(--border);border-radius:9px;
+  background:var(--card);color:var(--text-muted);
+  font-family:'Nunito',sans-serif;font-size:12.5px;font-weight:800;
+  padding:7px 15px;cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;gap:6px;
+}
+.btn-copy-pm:hover{border-color:var(--red);color:var(--red);background:var(--red-soft)}
+.btn-copy-pm.copied{background:rgba(45,158,107,.12);color:var(--green);border-color:var(--green)}
+
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .sidebar{height:auto;position:static}
+  .main{padding:18px 14px}
+  .skill-tab .t-label{display:none}
+  .skill-tab{padding:12px 6px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar">
+  <div class="sb-header">
+    <div class="logo-row">
+      <div class="logo-icon">🍎</div>
+      <div>
+        <div class="logo-name">FreshTeacher</div>
+        <div class="logo-sub">Task Constructor</div>
+      </div>
+    </div>
+    <div class="sb-tagline">Экспертные промпты для заданий на уроке</div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-sec-title">📝 Параметры урока</div>
+
+    <label>Уровень / класс</label>
+    <input type="text" id="f-level" placeholder="B1, 8 класс, Upper-Intermediate...">
+
+    <label>Тема урока</label>
+    <input type="text" id="f-topic" placeholder="Technology, Environment, Travel...">
+
+    <label>Лексика</label>
+    <textarea id="f-vocab" placeholder="sustainable, impact, innovation..."></textarea>
+
+    <label>Грамматика</label>
+    <textarea id="f-grammar" placeholder="Present Perfect, conditionals type 2..."></textarea>
+
+    <label>Дополнительный контекст</label>
+    <textarea id="f-context" placeholder="Учебник, тип урока, особые пожелания..."></textarea>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-sec-title">🌍 Язык урока</div>
+    <div class="lang-grid" id="lang-grid">
+      <div class="lang-pill active" data-lang="Английский"><span class="flag">🇬🇧</span>Английский</div>
+      <div class="lang-pill" data-lang="Испанский"><span class="flag">🇪🇸</span>Испанский</div>
+      <div class="lang-pill" data-lang="Немецкий"><span class="flag">🇩🇪</span>Немецкий</div>
+      <div class="lang-pill" data-lang="Французский"><span class="flag">🇫🇷</span>Французский</div>
+      <div class="lang-pill" data-lang="Китайский"><span class="flag">🇨🇳</span>Китайский</div>
+      <div class="lang-pill" data-lang="Итальянский"><span class="flag">🇮🇹</span>Итальянский</div>
+      <div class="lang-pill" data-lang="__custom__" style="grid-column:span 3"><span class="flag">✏️</span>Другой язык...</div>
+    </div>
+    <div class="lang-custom" id="lang-custom-wrap">
+      <input type="text" id="f-lang-custom" placeholder="Введите язык...">
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-sec-title">📄 Формат вывода</div>
+    <label>Длина задания</label>
+    <select id="f-length">
+      <option value="short">Короткое (5–10 мин)</option>
+      <option value="medium" selected>Среднее (15–20 мин)</option>
+      <option value="long">Развёрнутое (30+ мин)</option>
+    </select>
+    <label>Уровень сложности</label>
+    <select id="f-difficulty">
+      <option value="easy">Лёгкий — много опор</option>
+      <option value="medium" selected>Средний — частичные опоры</option>
+      <option value="hard">Сложный — без опор</option>
+    </select>
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<main class="main">
+
+  <!-- SKILL TABS -->
+  <div class="skill-tabs">
+    <button class="skill-tab active" data-tab="reading" onclick="switchTab('reading')">
+      <span class="t-icon">📖</span>
+      <span class="t-label">Чтение</span>
+    </button>
+    <button class="skill-tab" data-tab="writing" onclick="switchTab('writing')">
+      <span class="t-icon">✍️</span>
+      <span class="t-label">Письмо</span>
+    </button>
+    <button class="skill-tab" data-tab="vocab" onclick="switchTab('vocab')">
+      <span class="t-icon">📚</span>
+      <span class="t-label">Лексика</span>
+    </button>
+    <button class="skill-tab" data-tab="grammar" onclick="switchTab('grammar')">
+      <span class="t-icon">⚙️</span>
+      <span class="t-label">Грамматика</span>
+    </button>
+    <button class="skill-tab" data-tab="speaking" onclick="switchTab('speaking')">
+      <span class="t-icon">🗣️</span>
+      <span class="t-label">Спикинг</span>
+    </button>
+  </div>
+
+  <!-- ── READING ── -->
+  <div class="tab-panel active" id="tab-reading">
+    <div class="tasks-section-title">Текст и понимание</div>
+    <div class="tasks-grid" id="grid-reading"></div>
+  </div>
+
+  <!-- ── WRITING ── -->
+  <div class="tab-panel" id="tab-writing">
+    <div class="tasks-section-title">Письменная продукция</div>
+    <div class="tasks-grid" id="grid-writing"></div>
+  </div>
+
+  <!-- ── VOCAB ── -->
+  <div class="tab-panel" id="tab-vocab">
+    <div class="tasks-section-title">Лексические задания</div>
+    <div class="tasks-grid" id="grid-vocab"></div>
+  </div>
+
+  <!-- ── GRAMMAR ── -->
+  <div class="tab-panel" id="tab-grammar">
+    <div class="tasks-section-title">Грамматические задания</div>
+    <div class="tasks-grid" id="grid-grammar"></div>
+  </div>
+
+  <!-- ── SPEAKING ── -->
+  <div class="tab-panel" id="tab-speaking">
+    <div class="tasks-section-title">Говорение и дискуссия</div>
+    <div class="tasks-grid" id="grid-speaking"></div>
+  </div>
+
+</main>
+</div>
+
+<!-- ═══ PROMPT MODAL ═══ -->
+<div class="prompt-overlay" id="overlay" onclick="closeOverlay(event)">
+  <div class="prompt-modal">
+    <div class="pm-header">
+      <div class="pm-title" id="pm-title">Промпт</div>
+      <div class="pm-actions">
+        <button class="btn-copy-pm" id="btn-copy-pm" onclick="copyPrompt()">📋 Копировать</button>
+        <button class="btn-close" onclick="closeModal()">✕</button>
+      </div>
+    </div>
+    <div class="pm-body" id="pm-body"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+let selectedLang = 'Английский';
+
+function getLang() {
+  if (selectedLang === '__custom__') return $('f-lang-custom').value.trim() || 'Английский';
+  return selectedLang;
+}
+
+function d() {
+  const lengthMap = { short: '5–10 минут', medium: '15–20 минут', long: '30+ минут' };
+  const diffMap   = { easy: 'лёгкий (много опорных материалов)', medium: 'средний (частичные опоры)', hard: 'сложный (без опор)' };
+  return {
+    level:   $('f-level').value.trim()   || 'Не указан',
+    topic:   $('f-topic').value.trim()   || 'Не указана',
+    vocab:   $('f-vocab').value.trim()   || '—',
+    grammar: $('f-grammar').value.trim() || '—',
+    context: $('f-context').value.trim() || '—',
+    lang:    getLang(),
+    length:  lengthMap[$('f-length').value],
+    diff:    diffMap[$('f-difficulty').value],
+  };
+}
+
+// shared header block for all prompts
+function ctx(data) {
+  return `КОНТЕКСТ УРОКА:
+- Язык изучения: ${data.lang}
+- Уровень: ${data.level}
+- Тема урока: ${data.topic}
+- Целевая лексика: ${data.vocab}
+- Целевая грамматика: ${data.grammar}
+- Дополнительно: ${data.context}
+- Примерное время на задание: ${data.length}
+- Уровень сложности задания: ${data.diff}`;
+}
+
+// ═══════════════════════════════════════════════════
+//  TASK DEFINITIONS
+// ═══════════════════════════════════════════════════
+const TASKS = {
+
+/* ══════════ READING ══════════ */
+reading: [
+  {
+    emoji:'📰', name:'Аутентичный текст + задания',
+    desc:'Адаптированная статья/отрывок по теме + полный пакет заданий: pre-reading, while-reading, post-reading.',
+    buildPrompt(data){ return `РОЛЬ: Ты — опытный методист EFL/EFL и автор учебных материалов (CELTA/DELTA уровень). Создай полноценное задание на чтение.
+
+${ctx(data)}
+
+ЗАДАЧА: Написать учебный текст и к нему три блока заданий.
+
+ШАГ 1 — ТЕКСТ:
+Напиши связный, тематически насыщенный текст (${data.length}) по теме «${data.topic}» на языке ${data.lang}.
+- Уровень языка строго соответствует ${data.level}.
+- Органично включи целевую лексику: ${data.vocab}.
+- Если есть целевая грамматика (${data.grammar}), используй её в тексте естественно.
+- Жанр: публицистика / информационная статья (если тема позволяет — можно нарратив или диалог).
+- Заголовок + подзаголовки для удобства.
+
+ШАГ 2 — PRE-READING (2–3 задания):
+Активируй фоновые знания и предвосхищение. Примеры типов:
+- Brainstorm / predict from headline
+- True/False before reading
+- Discussion starter question
+
+ШАГ 3 — WHILE-READING (3–4 задания, разные когнитивные уровни):
+1. Scanning task (найди конкретные факты — ответы на вопросы Who/What/When/Where).
+2. Gist task (подбери подзаголовок к каждому абзацу / выбери лучший заголовок).
+3. Detailed comprehension: 4–6 вопросов с вариантами ответа (multiple choice) ИЛИ T/F/Not given.
+4. Vocabulary in context: выдели 4–6 слов из текста, попроси определить значение по контексту.
+
+ШАГ 4 — POST-READING (1–2 задания):
+Переносные и критические задания:
+- Reaction / agree-disagree + обоснование (3–4 предложения).
+- Или: найди параллели с собственным опытом / ситуацией в своей стране.
+
+ОФОРМЛЕНИЕ:
+- Каждый блок — чёткий заголовок + инструкция на языке ${data.lang} (+ перевод на русский в скобках при необходимости).
+- Ответы вынести отдельным блоком в конце: **ANSWER KEY**.
+- Учительские комментарии (timing, tips) — курсивом под каждым блоком.`}
+  },
+  {
+    emoji:'🔍', name:'Skimming & Scanning',
+    desc:'Два отдельных задания на беглое чтение ради общего смысла и поиска конкретных деталей.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/EFL, специализирующийся на развитии навыков чтения. Создай задания на skimming и scanning.
+
+${ctx(data)}
+
+ЗАДАЧА: Создать 2 чётко разграниченных задания, каждое на своей навык.
+
+ЗАДАНИЕ 1 — SKIMMING (беглое чтение):
+- Дай короткий текст (150–200 слов) или 3–4 коротких параграфа по теме «${data.topic}» (уровень ${data.level}).
+- Задача ученика: прочитать за 60–90 секунд и определить:
+  a) главную идею текста (1 предложение)
+  b) выбрать лучший заголовок из 4 предложенных
+  c) указать, чем является текст (реклама / новость / блог / отзыв / инструкция)
+- Инструкция: «Do not read every word — read quickly to get the main idea.»
+
+ЗАДАНИЕ 2 — SCANNING (поиск конкретной информации):
+- Другой текст или продолжение того же (150–200 слов).
+- 6–8 вопросов типа «Find the word/phrase/number/name that means…» или «How many? / When exactly? / Who said?»
+- Ответы — конкретные слова/числа/фрагменты из текста.
+- Инструкция: «You have 3 minutes. Do not read every word — search for specific information only.»
+
+МЕТОДИЧЕСКИЕ ЗАМЕТКИ:
+- Укажи рекомендуемое время на каждый таск.
+- Дай совет учителю: как помочь ученикам не «застревать» и не читать слово за словом.
+- ANSWER KEY в конце.`}
+  },
+  {
+    emoji:'🗂️', name:'Jigsaw Reading',
+    desc:'3–4 части одного топика раздаются разным ученикам — потом собирают полную картину вместе.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, эксперт по кооперативным техникам. Создай задание Jigsaw Reading.
+
+${ctx(data)}
+
+ЗАДАЧА: Создать Jigsaw Reading на тему «${data.topic}».
+
+СТРУКТУРА:
+Напиши 3 текста-сегмента (по 150–180 слов каждый, уровень ${data.level}) — три разных аспекта одной темы. Например:
+- Сегмент A: исторический / фактический фон
+- Сегмент B: современная ситуация / примеры
+- Сегмент C: будущее / мнения экспертов / проблемы
+
+Каждый сегмент:
+1. Самодостаточный (понятен без других частей).
+2. Содержит 2–3 единицы целевой лексики: ${data.vocab}.
+3. Шапка: «TEXT A / B / C — НЕ ПОКАЗЫВАЙ ДРУГИМ ГРУППАМ».
+
+ЗАДАНИЯ:
+ДО ЧТЕНИЯ (для всех): 1 вопрос-активатор по теме.
+
+ВО ВРЕМЯ ЧТЕНИЯ (индивидуально, своя карточка):
+- 3 comprehension questions к своему тексту.
+- 2 vocabulary items: найти значение по контексту.
+- 1 задание: «Prepare to explain the key idea of your text to your group in 2–3 sentences.»
+
+ПОСЛЕ ЧТЕНИЯ (в группе):
+- Sharing task: каждый рассказывает — остальные заполняют общую таблицу (шаблон таблицы приложи).
+- 2 общих вопроса, ответить на которые можно только объединив все 3 сегмента.
+
+УЧИТЕЛЬСКАЯ КАРТОЧКА:
+- Как организовать группы.
+- Timing: сколько минут на каждый этап.
+- Possible issues & solutions.`}
+  },
+  {
+    emoji:'🧩', name:'Text Reconstruction',
+    desc:'Jumbled paragraphs, missing sentences, cloze со связующими словами — восстанови логику текста.',
+    buildPrompt(data){ return `РОЛЬ: Ты — опытный EFL-методист. Создай задание на реконструкцию текста.
+
+${ctx(data)}
+
+ЗАДАЧА: Создать 2 варианта Text Reconstruction — выбери наиболее подходящий для уровня ${data.level}.
+
+ВАРИАНТ A — JUMBLED PARAGRAPHS:
+- Напиши связный текст из 5–6 абзацев по теме «${data.topic}» (уровень ${data.level}).
+- Перемешай абзацы и пронумеруй (1–5/6).
+- Задача ученика: восстановить правильный порядок.
+- Дай подсказки: «Look at linkers, pronouns, and topic flow.»
+- Правильная последовательность — в Answer Key.
+
+ВАРИАНТ B — MISSING SENTENCES:
+- Тот же или другой текст (5–7 абзацев).
+- Извлеки 4–5 предложений (одно из разных мест).
+- Вставь на их месте пробелы [A], [B], [C]…
+- Предложенные предложения — в перемешанном списке внизу (+ 1 лишнее-ловушка).
+- Подсказка: «Pay attention to grammar clues (pronouns, verb tenses) and discourse markers.»
+
+ВАРИАНТ C — COHESION CLOZE:
+- Текст с удалёнными связующими словами и союзами (however, although, as a result, nevertheless, etc.).
+- 10–12 пробелов. Слова из списка + 2 лишних.
+- Фокус: функции этих слов (contrast, addition, cause/effect, concession).
+
+ДЛЯ КАЖДОГО ВАРИАНТА:
+- Чёткая инструкция для ученика.
+- Методическая подсказка для учителя (на что обратить внимание при проверке).
+- ANSWER KEY.`}
+  },
+  {
+    emoji:'📊', name:'Critical Reading / Fact vs Opinion',
+    desc:'Учим различать факты, мнения, аргументы — развитие критического мышления на тексте.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, специализирующийся на критическом мышлении и академическом чтении.
+
+${ctx(data)}
+
+ЗАДАЧА: Создать задание Critical Reading на тему «${data.topic}».
+
+ШАГ 1 — ТЕКСТ:
+Напиши текст (200–250 слов, уровень ${data.level}) по теме «${data.topic}», который содержит:
+- 5–6 фактических утверждений (с цифрами, датами, исследованиями)
+- 4–5 мнений / оценочных суждений (эксперты, автор)
+- 2–3 причинно-следственных аргумента
+- Целевую лексику: ${data.vocab}
+
+ШАГ 2 — ЗАДАНИЯ (по уровню сложности):
+
+ЗАДАНИЕ 1 — Fact or Opinion?
+Выдай 10 предложений из текста. Ученик помечает: F (fact) / O (opinion) / A (argument/inference).
+
+ЗАДАНИЕ 2 — Evidence Hunt:
+«Find evidence in the text that supports / contradicts the following statements.»
+3–4 утверждения, нужно процитировать конкретный фрагмент.
+
+ЗАДАНИЕ 3 — Author's Purpose:
+3 вопроса:
+a) What is the author trying to achieve? (inform / persuade / describe / entertain)
+b) Who is the target audience? How do you know?
+c) What information might be missing or biased?
+
+ЗАДАНИЕ 4 — Reaction (уровень ${data.level}):
+«Do you agree with the author's position? Write 3–4 sentences with your own evidence or example.»
+
+УЧИТЕЛЬСКАЯ КАРТОЧКА:
+- Как вести класс-дискуссию по заданию 3.
+- Частые ошибки при различении fact vs opinion.
+- ANSWER KEY (для заданий 1 и 2).`}
+  },
+  {
+    emoji:'🗣️', name:'Reading-to-Speaking Bridge',
+    desc:'Текст становится трамплином: comprehension → дискуссия → мини-презентация своей точки зрения.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, интегрирующий навыки (integrated skills approach).
+
+${ctx(data)}
+
+ЗАДАЧА: Создать интегрированное задание Reading → Speaking по теме «${data.topic}».
+
+ЧАСТЬ 1 — ТЕКСТ (160–200 слов, уровень ${data.level}):
+Напиши провокационный / дискуссионный текст по теме «${data.topic}», включающий:
+- Чёткую позицию автора (controversial или thought-provoking)
+- Целевую лексику: ${data.vocab}
+- Целевую грамматику: ${data.grammar}
+
+ЧАСТЬ 2 — COMPREHENSION CHECK (быстрый, 3–4 мин):
+3 вопроса на понимание основных идей текста.
+
+ЧАСТЬ 3 — LANGUAGE FOCUS (5 мин):
+Извлеки из текста 3–4 полезных для дискуссии выражения/фразы (не просто слова):
+- Выражения мнения: «It can be argued that…», «The text suggests…»
+- Выражения согласия/несогласия
+- Академическая лексика из ${data.vocab}
+Задание: перефразируй эти выражения или составь свои предложения.
+
+ЧАСТЬ 4 — SPEAKING TASKS (10–12 мин):
+
+Task A — Pair discussion (3 мин):
+2–3 дискуссионных вопроса напрямую связанных с текстом. Уровень: от «ответ в тексте» до «твоё мнение».
+
+Task B — Role-based discussion (5 мин):
+Дай 2–3 роли/позиции (например: supporter / opponent / journalist). Ученики разыгрывают мини-дебаты на 3–4 реплики.
+
+Task C — Mini-presentation (2 мин):
+«Summarise the text in 3 sentences AND give your own opinion with one reason.»
+
+LANGUAGE SUPPORT:
+Вынеси полезные фразы для дискуссии (согласие, несогласие, уточнение, вывод) в отдельный блок-рамку.`}
+  },
+],
+
+/* ══════════ WRITING ══════════ */
+writing: [
+  {
+    emoji:'📝', name:'Guided Writing (с опорами)',
+    desc:'Пошаговое задание с планом, фразами-заготовками и моделью — для уверенного старта.',
+    buildPrompt(data){ return `РОЛЬ: Ты — опытный EFL/EFL методист, специалист по обучению письму (process writing approach).
+
+${ctx(data)}
+
+ЗАДАЧА: Создать задание Guided Writing по теме «${data.topic}».
+
+ЖАНР (выбери наиболее подходящий для уровня ${data.level} и темы «${data.topic}»):
+☐ Formal/informal email  ☐ Opinion essay  ☐ Narrative paragraph  ☐ Descriptive paragraph  ☐ Review
+
+ШАГ 1 — МОДЕЛЬ ТЕКСТА (model text):
+Напиши образцовый текст жанра (120–180 слов, уровень ${data.level}).
+- Органично включи целевую лексику: ${data.vocab}.
+- Используй целевую грамматику: ${data.grammar}.
+- После текста укажи в скобках: [topic sentence], [supporting detail], [example], [conclusion] — без перевода, только маркировка структуры.
+
+ШАГ 2 — TEXT ANALYSIS (3–4 мин):
+3–4 вопроса к модельному тексту:
+a) «What is the main argument/point of each paragraph?»
+b) «Find examples of [целевая грамматика].»
+c) «Which words help link ideas? Find 3 linkers.»
+d) «Is the tone formal or informal? How do you know?»
+
+ШАГ 3 — LANGUAGE TOOLKIT:
+Дай студенту инструменты (шаблон опор):
+- Useful phrases for opening / developing ideas / concluding (по 3–4 варианта каждый)
+- Целевые лексические единицы: ${data.vocab} — с примерами использования в данном жанре
+- Linking words для данного типа текста
+
+ШАГ 4 — WRITING TASK:
+Чёткое задание с:
+- Коммуникативной ситуацией (кто пишет, кому, зачем)
+- Минимальным планом (3–4 пункта)
+- Требованиями к объёму
+- Временем: ${data.length}
+
+ШАГ 5 — SELF-CHECK CHECKLIST:
+10 пунктов для самопроверки перед сдачей (structure / language / grammar / vocabulary / linkers / register).
+
+MARKING CRITERIA (для учителя): 4 критерия × 5 баллов.`}
+  },
+  {
+    emoji:'🏗️', name:'Process Writing',
+    desc:'Полный цикл: brainstorm → outline → draft → peer feedback → final version.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист, специализирующийся на process writing approach в EFL/ESL.
+
+${ctx(data)}
+
+ЗАДАЧА: Создать полный цикл Process Writing по теме «${data.topic}».
+
+STAGE 1 — PRE-WRITING (10–12 мин):
+
+Task 1a — Brainstorm:
+«Mind-map: What do you know / think / feel about [${data.topic}]? Write as many words and ideas as possible in 3 minutes. Don't filter.»
+Дай шаблон mind-map с центром и 5–6 ветками.
+
+Task 1b — Audience & Purpose:
+Вопросы: «Who will read this? What is your goal — to inform, persuade, entertain? How formal should your writing be?»
+
+Task 1c — Vocabulary activation:
+5–6 слов из ${data.vocab} — распредели по категориям или составь коллокации перед написанием.
+
+STAGE 2 — PLANNING (5–7 мин):
+Шаблон плана (paragraph-by-paragraph):
+- Introduction: hook + thesis statement
+- Body 1: main point 1 + evidence + example
+- Body 2: main point 2 + evidence + example
+- (Body 3 при необходимости)
+- Conclusion: restate + wider implication
+Задача: заполнить шаблон ключевыми словами (не полными предложениями).
+
+STAGE 3 — DRAFTING (${data.length}):
+Коммуникативное задание + чёткая инструкция:
+«Use your plan. Do not worry about perfection — focus on getting ideas down.»
+Объём и жанр текста.
+
+STAGE 4 — PEER FEEDBACK:
+Peer feedback form (12 вопросов-чекпоинтов): structure / content / vocabulary / grammar / linkers / clarity.
+Инструкция: «Comment, don't correct. Write what works well (WWW) and what could be improved (EBI).»
+
+STAGE 5 — REVISION & FINAL DRAFT:
+3 фокус-вопроса для саморедактуры:
+«Did you address the task fully? Did you use the target vocabulary? Is the register consistent?»
+
+ОЦЕНОЧНАЯ РУБРИКА: Content / Organisation / Language Use / Vocabulary — по 5 баллов с дескрипторами.`}
+  },
+  {
+    emoji:'✉️', name:'Жанровое письмо (email / essay / review)',
+    desc:'Разбор жанра, типичные ошибки, модель + чёткое коммуникативное задание.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист и автор учебных материалов, специализирующийся на genre-based writing в EFL/ESL.
+
+${ctx(data)}
+
+ЗАДАЧА: Создать жанровое задание по письму. Жанр — определи сам, наиболее подходящий для темы «${data.topic}» и уровня ${data.level}.
+
+ЖАНРОВЫЙ ОБЗОР (Genre Awareness):
+
+1. ТИПИЧНАЯ СТРУКТУРА:
+Опиши чёткую структуру жанра: какие части, зачем каждая, обязательные vs опциональные элементы.
+
+2. REGISTER & TONE:
+Объясни требования к регистру. Дай 3–4 примера типичных для жанра фраз (opening / closing / transitions).
+
+3. COMMON MISTAKES (5 типичных ошибок этого уровня и жанра):
+Для каждой — неверный пример → верный пример + объяснение.
+
+4. MODEL TEXT (150–200 слов):
+Образцовый текст по теме «${data.topic}», уровень ${data.level}.
+Включи: ${data.vocab} (лексика), ${data.grammar} (грамматика).
+После текста — annotated version: отметь структурные элементы, полезные фразы, grammatical highlights.
+
+5. DECONSTRUCTION TASK:
+«Analyse the model text. Find:
+a) The opening formula/hook
+b) The main argument or purpose statement
+c) Two examples of [${data.grammar}]
+d) Three words from the vocabulary list in context
+e) The closing formula»
+
+6. WRITING TASK:
+Новая ситуация (не как в модели!) с чёткими параметрами: адресат, цель, тон, объём.
+
+7. SELF-ASSESSMENT GRID:
+Таблица 5 × 3: критерий / yes, fully / partially / not yet.`}
+  },
+  {
+    emoji:'🔄', name:'Sentence Transformation & Paraphrase',
+    desc:'Перефразируй без потери смысла: реструктуризация предложений с целевой грамматикой.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL и автор экзаменационных материалов (Cambridge-style).
+
+${ctx(data)}
+
+ЗАДАЧА: Создать задание Sentence Transformation & Paraphrase с фокусом на ${data.grammar}.
+
+БЛОК 1 — CONTROLLED TRANSFORMATION (10 пунктов):
+Каждое задание: исходное предложение + ключевое слово (в скобках) + пробел для ответа.
+Формат: «Rewrite the sentence using the word given. Do not change the word.»
+
+Примеры типов трансформаций для грамматики ${data.grammar}:
+- Active ↔ Passive
+- Direct ↔ Reported speech
+- Affirmative ↔ Negative with same meaning
+- Sentence combining with different connector
+- Modal verb substitution
+- Verb form change (e.g. gerund ↔ infinitive)
+
+Содержательно — все предложения в рамках темы «${data.topic}», используй лексику: ${data.vocab}.
+
+БЛОК 2 — OPEN PARAPHRASE (5 пунктов):
+«These sentences mean the same. Complete the second sentence so that it has a similar meaning to the first.»
+Вторая половина предложения уже дана (начало или конец) — ученик заполняет пробел.
+
+БЛОК 3 — MINI-WRITING EXTENSION:
+«Now write 3 original sentences about [${data.topic}] using [${data.grammar}]. Each sentence must include one word from the vocabulary list.»
+
+ANSWER KEY для блоков 1 и 2.
+
+УЧИТЕЛЬСКИЕ СОВЕТЫ:
+- Типичные ошибки при трансформациях на ${data.grammar}.
+- Как использовать этот вид заданий как pre-writing warm-up.`}
+  },
+  {
+    emoji:'📋', name:'Summary Writing',
+    desc:'Сворачивание информации: конспект, ключевые идеи, академический саммари.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, специализирующийся на академических навыках письма.
+
+${ctx(data)}
+
+ЗАДАЧА: Создать задание Summary Writing по теме «${data.topic}».
+
+ШАГ 1 — ИСХОДНЫЙ ТЕКСТ:
+Напиши информационный текст (220–280 слов, уровень ${data.level}) по теме «${data.topic}».
+Включи: ${data.vocab}, элементы ${data.grammar}. Несколько точек зрения или фактов.
+
+ШАГ 2 — PRE-TASK AWARENESS:
+Объясни разницу между:
+- Summary (objective overview of main ideas)
+- Paraphrase (rewording specific parts)
+- Critique (your evaluation)
+
+Дай 4 правила хорошего саммари:
+1. Include only main ideas (no minor details).
+2. Use your own words — no copy-paste.
+3. Keep the original meaning.
+4. Use appropriate reporting language.
+
+ШАГ 3 — GUIDED SUMMARY (scaffolded):
+a) «Identify the main idea of each paragraph in 1–2 keywords.» (таблица: параграф / ключевые слова)
+b) «Which details are important enough to include? Which can you cut?»
+c) «Write a topic sentence for your summary.»
+
+ШАГ 4 — SUMMARY WRITING TASK:
+«Write a summary of the text in [60–80 / 80–100 / 100–120] words. Use your own words as much as possible.»
+
+ШАГ 5 — REPORTING LANGUAGE BANK:
+15–20 полезных фраз для саммари:
+- The text discusses / examines / argues…
+- According to the author…
+- The main point is that…
+- The author concludes by…
+
+ШАГ 6 — PEER EVALUATION:
+3-пунктовая форма: «Does the summary cover all main ideas? Are ideas expressed in the writer's own words? Is the appropriate length maintained?»`}
+  },
+  {
+    emoji:'🧠', name:'Creative & Productive Writing',
+    desc:'Нарратив, короткий рассказ, dialogue writing — с техниками и структурой.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL и автор курсов по creative writing.
+
+${ctx(data)}
+
+ЗАДАЧА: Создать задание Creative/Productive Writing по теме «${data.topic}», уровень ${data.level}.
+
+ВЫБЕРИ ЖАНР (наиболее подходящий для уровня и темы):
+A) Short narrative / story  B) Dialogue  C) Blog post / personal essay  D) Script / roleplay scenario
+
+ШАГ 1 — STIMULUS:
+Дай визуальный или текстовый стимул:
+- Описание сцены / ситуации (3–4 предложения)
+- Или: первое предложение рассказа («story starter»)
+- Или: заголовок + три ключевых слова
+
+ШАГ 2 — NARRATIVE TECHNIQUES MINI-LESSON:
+Объясни 3–4 техники, подходящие для уровня ${data.level}:
+- Показывай, не рассказывай (show don't tell) — пример до/после
+- Dialogue to move the plot
+- Sensory details
+- Varied sentence length for effect
+Для каждой: brief explanation + пример (плохой → хороший).
+
+ШАГ 3 — PRE-WRITING:
+a) Character / situation map — что нужно решить перед написанием (5 вопросов)
+b) Vocabulary brainstorm: сгруппируй слова из ${data.vocab} по эмоциям/чувствам/действиям
+c) Structure planner: beginning / complication / climax / resolution (4 ячейки)
+
+ШАГ 4 — WRITING TASK:
+Чёткое задание с ситуацией, объёмом (${data.length}) и фокусом:
+«Use at least 4 words from the vocabulary list. Try to use [${data.grammar}] naturally in your writing.»
+
+ШАГ 5 — AUTHOR'S CHAIR (sharing):
+«Read your story aloud (or swap with a partner). Listeners answer: What did you like best? What question do you have for the author?»
+
+ОЦЕНОЧНАЯ РУБРИКА: Content & Creativity / Structure / Language Range / Accuracy — по 5 баллов.`}
+  },
+],
+
+/* ══════════ VOCAB ══════════ */
+vocab: [
+  {
+    emoji:'🔑', name:'Vocabulary in Context',
+    desc:'Слова встречаются в тексте, изучаются в контексте — никаких списков наизусть.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, следующий принципам lexical approach (Michael Lewis). Создай задание Vocabulary in Context.
+
+${ctx(data)}
+
+ЦЕЛЕВЫЕ СЛОВА/ФРАЗЫ: ${data.vocab}
+
+ПРИНЦИП: Ни одного задания типа «match word — translation». Всё через контекст, коллокации и употребление.
+
+БЛОК 1 — CONTEXTUAL READING (5–7 мин):
+Напиши мини-текст (120–160 слов, уровень ${data.level}) по теме «${data.topic}», органично включая все целевые слова.
+Подчеркни/выдели целевые слова в тексте.
+
+БЛОК 2 — MEANING FROM CONTEXT (5 мин):
+Для каждого целевого слова — 2–3 вопроса:
+a) «What does [word] mean in this context? Choose the best definition: A / B / C.»
+b) «What does [word] NOT mean? Eliminate the wrong definition.»
+c) «Is [word] positive, negative, or neutral in this context?»
+
+БЛОК 3 — COLLOCATION MAPPING:
+Для 4–5 ключевых слов:
+- Дай 6 слов-коллокатов (реальные коллокации из корпуса).
+- Задача: «Circle the words that naturally go with [target word].» (2 лишних-ловушки)
+- Составить 2 предложения с правильными коллокациями.
+
+БЛОК 4 — WORD FAMILY CHART:
+Таблица для 4–5 слов: noun / verb / adjective / adverb.
+Ячейки частично заполнены — ученик дополняет.
+Задание: «Fill in the missing forms. Use a dictionary if needed.»
+
+БЛОК 5 — PERSONALISATION:
+3 вопроса, требующих личного ответа с использованием целевой лексики:
+«When was the last time you…? Can you think of an example of…? Do you agree that…?»
+
+БЛОК 6 — RETRIEVAL PRACTICE:
+Закрой текст. «Complete the sentences using the correct form of the target words.»
+10 gap-fill предложений (новый контекст, не из текста выше).`}
+  },
+  {
+    emoji:'🕸️', name:'Semantic Mapping & Word Networks',
+    desc:'Ментальные карты слов, семантические поля, тематические кластеры.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, специалист по vocabulary development.
+
+${ctx(data)}
+
+ЦЕЛЕВЫЕ СЛОВА/ФРАЗЫ: ${data.vocab}
+
+ЗАДАЧА: Создать задание Semantic Mapping для глубокого усвоения лексики темы «${data.topic}».
+
+ЭТАП 1 — ACTIVATION (3 мин):
+«In 2 minutes, write every word you associate with [${data.topic}]. Don't stop, don't filter.»
+Затем: сравни с партнёром, объясни связи между словами.
+
+ЭТАП 2 — SEMANTIC FIELD ANALYSIS:
+Разбей ${data.vocab} на семантические группы (3–5 групп).
+Для каждой группы дай название и объясни принцип группировки.
+Задание: «Can you add 2 more words to each group?»
+
+ЭТАП 3 — WORD RELATIONSHIPS:
+Для 4–5 пар слов из ${data.vocab} установи отношения:
+- Synonym / near-synonym (разница в оттенке)
+- Antonym / opposite
+- Hyponym / hypernym (частное / общее)
+- Collocation partner
+Задание: «Write the relationship type and explain the difference in meaning.»
+
+ЭТАП 4 — CONNOTATION & REGISTER SORT:
+Выдай 12–15 слов по теме (${data.vocab} + добавь похожие).
+Задание: распредели по шкалам:
+a) Formal ←————→ Informal
+b) Positive ←————→ Negative
+c) Specific ←————→ General
+Обсудите разногласия в парах.
+
+ЭТАП 5 — EXTENDED MAPPING TASK:
+Создай центральный узел «[тема]» и вокруг него 4 ветки:
+branch 1: people/roles, branch 2: actions/processes, branch 3: places/things, branch 4: feelings/attitudes.
+Задание: «Add minimum 3 words to each branch. Use the vocabulary list AND your own knowledge.»
+
+ЭТАП 6 — MINI-QUIZ:
+10 вопросов типа: «Which word in the list…
+- is the most formal?
+- has the most negative connotation?
+- describes a process?
+- can be used as both noun and verb?»`}
+  },
+  {
+    emoji:'🎯', name:'Collocations & Chunks',
+    desc:'Устойчивые сочетания, глагольно-именные коллокации, идиомы и делексические глаголы.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, следующий лексическому подходу (Lewis Lexical Approach). Создай задание Collocations & Chunks.
+
+${ctx(data)}
+
+ЦЕЛЕВЫЕ СЛОВА: ${data.vocab}
+
+ЗАДАЧА: Обучить коллокациям и устойчивым выражениям по теме «${data.topic}».
+
+БЛОК 1 — NOTICING (5 мин):
+Напиши текст (150–180 слов, уровень ${data.level}), насыщенный коллокациями.
+Попроси ученика: «Underline any word combinations that seem to go together naturally. Compare with a partner.»
+После: выдели 10–12 ключевых коллокаций, объясни, почему именно эти слова «дружат».
+
+БЛОК 2 — VERB + NOUN COLLOCATIONS:
+Таблица: 5 делексических глаголов (make, do, have, take, get, give, pay) × тема «${data.topic}».
+Задание: «Match the verbs to the nouns to make natural collocations. Some verbs may be used more than once.»
+5 ловушек (неестественные сочетания в списке).
+
+БЛОК 3 — ADJ + NOUN / NOUN + NOUN:
+Для 6 существительных из ${data.vocab}: дай 4 прилагательных / существительных.
+Задание: «2 are natural collocations, 2 are not. Circle the natural ones.»
+
+БЛОК 4 — PREPOSITIONAL PHRASES & FIXED CHUNKS:
+10 устойчивых выражений по теме (фразальные глаголы, идиомы или академические фразы — в зависимости от ${data.level}).
+Задание A: «Match the chunk to its meaning.»
+Задание B: «Complete the sentences with the correct chunk.»
+
+БЛОК 5 — CHUNK BUILDING:
+Дай 5 «голых» глаголов. Задача — построить максимально длинный «chunk» вокруг каждого:
+Verb → Verb + Object → Verb + Object + Adverb → Verb + Object + Adverb + Prepositional phrase.
+
+БЛОК 6 — PRODUCTION:
+«Write 5 sentences about [${data.topic}] using collocations from today's lesson. At least 3 must be from the new vocabulary.»`}
+  },
+  {
+    emoji:'🃏', name:'Lexical Recycling Tasks',
+    desc:'Системное повторение: retrieval practice, spaced repetition tasks, тест-себя.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, специалист по vocabulary retention и spaced repetition.
+
+${ctx(data)}
+
+ЦЕЛЕВЫЕ СЛОВА: ${data.vocab}
+
+ЗАДАЧА: Создать набор Lexical Recycling Tasks для закрепления и извлечения лексики из памяти.
+
+ЗАДАНИЕ 1 — DEFINITION CHALLENGE:
+Для 8–10 слов из ${data.vocab}: напиши контекстное определение (не словарное, а «своими словами»).
+Ученик: «Write the word being defined.»
+Затем: «Now write your own definition for 3 of the words.»
+
+ЗАДАНИЕ 2 — GAPPED SENTENCES (10 пунктов):
+10 предложений по теме «${data.topic}» с пробелами.
+Слова в банке (+ 2 лишних). Все предложения — новый контекст (не из предыдущих заданий!).
+Фокус: правильная грамматическая форма слова (не только выбор слова, но и его форма).
+
+ЗАДАНИЕ 3 — ODD ONE OUT:
+10 групп по 4 слова. В каждой группе — одно лишнее.
+Задача: «Circle the odd one out. Explain why.»
+Принципы: значение / регистр / грамматическая категория / коллокационный паттерн.
+
+ЗАДАНИЕ 4 — ERROR CORRECTION:
+10 предложений — в каждом одна лексическая ошибка (неправильное слово / форма / коллокация).
+Задача: «Find and correct the mistake. Write the correct version.»
+Ошибки — типичные для уровня ${data.level}.
+
+ЗАДАНИЕ 5 — TRANSLATION BACK-TRANSLATION:
+Дай 6 предложений на родном языке. Ученик переводит на ${data.lang}, используя целевую лексику.
+Затем: «Check your translation. Did you use the target vocabulary naturally?»
+
+ЗАДАНИЕ 6 — 2-MINUTE RECALL:
+«Cover the vocabulary list. Write as many words as you remember in 2 minutes.»
+Затем: «Check. Which words did you forget? Why? What can help you remember them?»`}
+  },
+  {
+    emoji:'📖', name:'Phrasal Verbs & Idioms',
+    desc:'Контекстуальное изучение фразовых глаголов и идиоматики с принципами disambiguation.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, специализирующийся на изучении фразовых глаголов и идиоматики.
+
+${ctx(data)}
+
+ЗАДАЧА: Создать задание Phrasal Verbs & Idioms по теме «${data.topic}».
+
+ВЫБОР МАТЕРИАЛА:
+Отбери 8–10 наиболее частотных и полезных для уровня ${data.level} фразовых глаголов / идиом по теме «${data.topic}».
+Укажи: phrasal verb / idiom, его значение, формальность (formal/neutral/informal), частотность (★★★ / ★★ / ★).
+
+БЛОК 1 — NOTICING IN CONTEXT:
+Напиши текст (160–200 слов) с 8–10 целевыми выражениями, выделенными жирным.
+Вопросы: «Can you guess the meaning of each highlighted expression from context? Match to definitions below.»
+Определения — перефразированные, не словарные.
+
+БЛОК 2 — LITERAL vs IDIOMATIC:
+Для 5 phrasal verbs — покажи оба значения (буквальное и переносное) в парных предложениях.
+Задание: «Which sentence uses the phrasal verb literally, which idiomatically? L or I.»
+
+БЛОК 3 — GRAMMAR OF PHRASAL VERBS:
+Separable vs inseparable — 5 примеров каждого.
+Задание: «Rewrite using a pronoun: "Turn off the light / Turn the light off" → "Turn it off" — correct or incorrect?»
+10 упражнений на separability.
+
+БЛОК 4 — GAP FILL & MULTIPLE CHOICE:
+8 предложений с пробелами. Для каждого — 3 варианта phrasal verb / idiom (один верный).
+Все предложения в контексте темы «${data.topic}».
+
+БЛОК 5 — PERSONALISATION:
+«Write 4 sentences about your own experience using 4 different expressions from today's lesson.»
+Peer check: «Are the expressions used correctly and naturally?»`}
+  },
+  {
+    emoji:'⚡', name:'Vocabulary Activation Warm-Up',
+    desc:'Быстрые разминочные активности: word association, 20 questions, backs to the board и др.',
+    buildPrompt(data){ return `РОЛЬ: Ты — опытный EFL/ESL преподаватель, эксперт по vocabulary warm-up activities.
+
+${ctx(data)}
+
+ЦЕЛЕВЫЕ СЛОВА: ${data.vocab}
+
+ЗАДАЧА: Создать набор из 5–6 быстрых лексических активностей (5–7 мин каждая) по теме «${data.topic}».
+
+АКТИВНОСТЬ 1 — WORD ASSOCIATION CHAIN:
+Правила + пример цепочки по теме «${data.topic}».
+Вариации: по буквам / по семантическому полю / с запретными словами.
+
+АКТИВНОСТЬ 2 — BACKS TO THE BOARD (или SCREEN):
+Как организовать: один ученик спиной к доске, остальные объясняют слова.
+Список из 15 слов из ${data.vocab} + 5 тематических слов.
+Правила объяснения: без перевода, без однокоренных слов.
+Совет учителю: как адаптировать для онлайна.
+
+АКТИВНОСТЬ 3 — 20 QUESTIONS:
+Учитель загадывает понятие из темы «${data.topic}».
+Ученики задают Yes/No вопросы.
+Список из 10 понятий для загадывания (от простых до сложных по уровню ${data.level}).
+
+АКТИВНОСТЬ 4 — SPEED SORT:
+10–12 слов. Ученики за 60 секунд распределяют по 3 категориям (категории задаёт учитель).
+Предложи 3 варианта критериев сортировки.
+
+АКТИВНОСТЬ 5 — DEFINITION TENNIS:
+Пары. Один даёт определение — другой называет слово. Потом меняются.
+Правило: нельзя использовать однокоренные слова.
+Список 15 слов для игры.
+
+АКТИВНОСТЬ 6 — VOCABULARY AUCTION:
+Список из 20 словосочетаний — часть правильные коллокации, часть неверные.
+Команды «покупают» словосочетания, которые считают верными. Побеждает та, у кого больше верных «покупок».
+Список словосочетаний для аукциона.`}
+  },
+],
+
+/* ══════════ GRAMMAR ══════════ */
+grammar: [
+  {
+    emoji:'🔭', name:'Inductive Grammar Discovery',
+    desc:'Ученик сам выводит правило из примеров — PPP наоборот. Глубокое понимание вместо зубрёжки.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, специалист по Guided Discovery и Consciousness Raising подходу в обучении грамматике.
+
+${ctx(data)}
+
+ЦЕЛЕВАЯ ГРАММАТИКА: ${data.grammar}
+
+ЗАДАЧА: Создать Inductive Grammar Discovery lesson на тему «${data.topic}».
+
+ФАЗА 1 — DATA PRESENTATION (input flood):
+Напиши 12–15 предложений / короткий текст (130–160 слов, уровень ${data.level}) по теме «${data.topic}».
+Насыти его примерами ${data.grammar} в разных функциях и контекстах.
+Выдели целевую структуру жирным (или попроси учеников найти и подчеркнуть).
+
+ФАЗА 2 — NOTICING TASKS:
+a) «Underline all examples of [целевая форма]. How many did you find?»
+b) «Look at the highlighted sentences. What do they have in common structurally?»
+c) «Find the differences between sentence A and sentence B. What changes? What stays the same?»
+
+ФАЗА 3 — HYPOTHESIS FORMATION:
+Серия направляющих вопросов (Socratic questions), ведущих ученика к правилу:
+1. «When is [form A] used? When is [form B] used?»
+2. «What kind of time expressions appear with this structure?»
+3. «Is there a pattern in the word order?»
+4. «Can you find any exceptions? How do you explain them?»
+
+ФАЗА 4 — RULE ARTICULATION:
+«Complete the grammar rule in your own words:»
+Шаблон с пробелами (частично заполненное правило).
+Затем: сравни своё правило с правилом-эталоном (дай эталон после задания).
+
+ФАЗА 5 — CONSCIOUSNESS RAISING TEST:
+«Read these sentences. Which are correct? Which are wrong? Why?»
+8 предложений — 4 верных, 4 с типичными ошибками (каждая иллюстрирует отдельное правило).
+
+ФАЗА 6 — CONTROLLED PRACTICE:
+10 упражнений на применение выведенного правила.
+
+МЕТОДИЧЕСКАЯ КАРТОЧКА: как фасилитировать дискуссию при расхождении гипотез.`}
+  },
+  {
+    emoji:'⚙️', name:'Grammar Practice Sequence',
+    desc:'Классическая прогрессия: controlled → semi-controlled → free practice. Экзаменационный формат.',
+    buildPrompt(data){ return `РОЛЬ: Ты — опытный EFL/ESL методист и автор учебных материалов. Создай Grammar Practice Sequence.
+
+${ctx(data)}
+
+ЦЕЛЕВАЯ ГРАММАТИКА: ${data.grammar}
+
+ЗАДАЧА: Создать трёхуровневую последовательность практики от контролируемой к свободной.
+
+УРОВЕНЬ 1 — CONTROLLED PRACTICE (механическое закрепление):
+
+Task 1a — Fill in the correct form (10 пунктов):
+Предложения по теме «${data.topic}» с пробелами + глагол в инфинитиве в скобках.
+Фокус: формальная правильность, не коммуникация.
+
+Task 1b — Choose the correct option (8 пунктов):
+Multiple choice A/B или A/B/C. Ловушки — типичные ошибки уровня ${data.level}.
+
+Task 1c — Error correction (6 пунктов):
+«Find and correct ONE mistake in each sentence.»
+Все ошибки касаются ${data.grammar}.
+
+УРОВЕНЬ 2 — SEMI-CONTROLLED PRACTICE (язык в контексте):
+
+Task 2a — Sentence transformation (8 пунктов):
+Cambridge-style. Rewrite using key word. Смысл сохраняется.
+
+Task 2b — Guided paragraph:
+Дай skeleton (5–6 bullet points) и попроси написать абзац (60–80 слов) по теме «${data.topic}» используя ${data.grammar}.
+«Use at least 5 examples of [${data.grammar}].»
+
+УРОВЕНЬ 3 — FREE PRACTICE (коммуникативная задача):
+
+Task 3 — Communicative task:
+Реальная коммуникативная задача (discussion, roleplay, survey, problem-solving) по теме «${data.topic}», в которой использование ${data.grammar} естественно и функционально.
+Инструкция + language support box.
+
+ANSWER KEY для уровней 1 и 2.
+Marking rubric для уровня 3 (accuracy + fluency + grammar use).`}
+  },
+  {
+    emoji:'🐛', name:'Error Analysis & Correction',
+    desc:'Работа с реальными ошибками: анализ, классификация, исправление, предотвращение.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL и лингвист, специализирующийся на Error Analysis (Corder, Ellis).
+
+${ctx(data)}
+
+ЦЕЛЕВАЯ ГРАММАТИКА: ${data.grammar}
+
+ЗАДАЧА: Создать задание Error Analysis & Correction.
+
+ЧАСТЬ 1 — ТИПОЛОГИЯ ОШИБОК:
+Для грамматики ${data.grammar} — опиши 6 наиболее частых ошибок уровня ${data.level}:
+Для каждой:
+- Тип ошибки: interlingual (L1 interference) / intralingual (overgeneralization/simplification/false analogy) / developmental
+- Пример неверного предложения
+- Верная форма + объяснение «почему так»
+
+ЧАСТЬ 2 — ERROR CORRECTION TASKS:
+
+Task A — Spot and correct (12 предложений):
+Каждое предложение по теме «${data.topic}» содержит ровно одну ошибку.
+Нет лишних предложений без ошибок (чёткий сигнал — ошибка есть всегда).
+
+Task B — Text correction:
+Текст 120–150 слов с 8–10 пронумерованными ошибками (обозначены подчёркиванием или [номером]).
+Задача: найти и исправить все ошибки.
+Answer Key: неверный вариант → верный + объяснение.
+
+Task C — Correct or incorrect? Why?
+10 пар предложений (A и B). Одно верное, одно неверное.
+Задача: «Which is correct? What's wrong with the other one?»
+
+ЧАСТЬ 3 — PREVENTION STRATEGIES:
+Для 4 ключевых ошибок — дай мнемотехнику или «правило-сигнал», помогающее не ошибиться.
+
+ЧАСТЬ 4 — ERROR AWARENESS REFLECTION:
+«Look at your own writing. Find 2 sentences where you used [${data.grammar}]. Underline them. Are they correct? How do you know?»`}
+  },
+  {
+    emoji:'🧾', name:'Grammar in Context (текстовый подход)',
+    desc:'Грамматика через подлинный контекст: функции, не формы. Анализ real-life текстов.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, придерживающийся functional grammar approach.
+
+${ctx(data)}
+
+ЦЕЛЕВАЯ ГРАММАТИКА: ${data.grammar}
+
+ЗАДАЧА: Создать задание Grammar in Context — изучение ${data.grammar} через функцию в тексте.
+
+ШАГ 1 — AUTHENTIC-STYLE TEXT:
+Напиши или адаптируй текст (180–220 слов) реалистичного жанра (статья / письмо / диалог / интервью) по теме «${data.topic}».
+Включи ${data.grammar} в 8–10 примерах разных функций.
+Включи целевую лексику: ${data.vocab}.
+
+ШАГ 2 — FORM ANALYSIS:
+«Find all examples of [${data.grammar}] in the text. Complete the table:»
+Таблица: пример из текста / структура / функция / временной контекст.
+
+ШАГ 3 — FUNCTION FOCUS:
+Объясни 3–4 различные функции ${data.grammar} в реальной коммуникации:
+Для каждой — 2–3 примера из текста + 1 дополнительный.
+Вопрос: «Why did the writer choose [эта форма], not [другая форма]? What changes in meaning if you use [другая форма]?»
+
+ШАГ 4 — REGISTER & FREQUENCY:
+«Is [${data.grammar}] more common in spoken or written language? In formal or informal contexts?»
+Дай 3 примера из разных регистров.
+
+ШАГ 5 — USAGE GRADIENT:
+Шкала 1–10 (от очень formal до very informal):
+Расставь 8–10 структур/вариантов ${data.grammar} на шкале.
+Обсудите в парах.
+
+ШАГ 6 — PRODUCTION IN CONTEXT:
+«Write a short text (80–100 слов) in the same genre as the original, about [${data.topic}]. Use [${data.grammar}] at least 4 times — in different functions.»
+Checklist самопроверки: 5 пунктов.`}
+  },
+  {
+    emoji:'📐', name:'Grammar Consciousness-Raising',
+    desc:'Сравнение структур, перевод и обратный перевод, L1 interference — meta-awareness.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, специалист по Consciousness-Raising Tasks (Rutherford & Sharwood Smith).
+
+${ctx(data)}
+
+ЦЕЛЕВАЯ ГРАММАТИКА: ${data.grammar}
+
+ЗАДАЧА: Создать Consciousness-Raising задание для глубокого осознания ${data.grammar}.
+
+ЗАДАНИЕ 1 — COMPARE & CONTRAST:
+Дай 6 пар минимальных пар (minimal pairs) для ${data.grammar}:
+Предложение A vs предложение B — грамматически разные, контекстуально близкие.
+«What is the difference in meaning or use between A and B? Which would you use, and when?»
+
+ЗАДАНИЕ 2 — L1 INTERFERENCE ANALYSIS:
+Опиши 4 случая, когда родной язык (русский/общий L1) «мешает» правильному использованию ${data.grammar}.
+Для каждого: буквальный «кальк» → неверная форма → верная форма → объяснение разрыва.
+
+ЗАДАНИЕ 3 — TRANSLATION TASK:
+8 предложений на русском — перевести на ${data.lang}.
+Предложения специально отобраны так, чтобы прямой перевод давал типичную ошибку.
+Answer Key с объяснением каждого перевода.
+
+ЗАДАНИЕ 4 — BACK-TRANSLATION:
+5 предложений на ${data.lang} → перевести на русский → снова на ${data.lang} (не подглядывая).
+Сравни свою версию с оригиналом. Что изменилось? Почему?
+
+ЗАДАНИЕ 5 — METALINGUISTIC REFLECTION:
+«Explain [${data.grammar}] to a friend who is just starting to learn ${data.lang}. Use simple language, one example, and one common mistake to avoid.»
+Peer assessment: «Is the explanation accurate and helpful?»`}
+  },
+  {
+    emoji:'🎯', name:'Targeted Grammar Drill (коммуникативные дриллы)',
+    desc:'Не механические — коммуникативные дриллы: substitution tables, information gap, cue cards.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, специалист по communicative grammar drills.
+
+${ctx(data)}
+
+ЦЕЛЕВАЯ ГРАММАТИКА: ${data.grammar}
+
+ЗАДАЧА: Создать набор коммуникативных дриллов для отработки ${data.grammar}.
+
+ДРИЛЛ 1 — SUBSTITUTION TABLE:
+Создай substitution table на 3–4 колонки для ${data.grammar}.
+Ученик комбинирует элементы, создавая грамматически верные и семантически осмысленные предложения.
+Минимум 4×4×3 комбинации.
+
+ДРИЛЛ 2 — INFORMATION GAP:
+Два ученика (Student A / Student B) — у каждого неполная информация.
+Задача: задать вопросы и заполнить пропуски в своей таблице.
+Весь обмен информацией — только через ${data.grammar}.
+Шаблоны таблиц для A и B + примерные вопросы.
+
+ДРИЛЛ 3 — CUE CARDS (20 карточек):
+Каждая карточка = картинка/ситуация/ключевое слово.
+Ученик видит cue → формирует предложение с ${data.grammar}.
+Прогрессия: от механического к коммуникативному использованию.
+
+ДРИЛЛ 4 — CHAIN DRILL с PERSONALISATION:
+Каждый ученик отвечает на вопрос, используя ${data.grammar}, и задаёт следующий вопрос соседу.
+Стартовый вопрос + 5 вариаций на тему «${data.topic}».
+
+ДРИЛЛ 5 — MINI-DEBATE:
+Тема спора, связанная с «${data.topic}». Правило: каждое высказывание должно содержать ${data.grammar}.
+Учитель фиксирует примеры использования на доске.`}
+  },
+],
+
+/* ══════════ SPEAKING ══════════ */
+speaking: [
+  {
+    emoji:'💬', name:'Structured Discussion',
+    desc:'Управляемая дискуссия с ролями, аргументацией и language support для всех уровней.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, специалист по обучению устной речи (speaking pedagogy).
+
+${ctx(data)}
+
+ЗАДАЧА: Создать Structured Discussion по теме «${data.topic}».
+
+ЧАСТЬ 1 — DISCUSSION PREPARATION (5–7 мин):
+
+Topic statement (provocative/controversial):
+Сформулируй чёткое, спорное утверждение по теме «${data.topic}» (1 предложение).
+
+Pre-discussion tasks:
+a) «Rank these factors from most to least important. Compare with a partner.»
+(5–6 факторов, связанных с темой)
+b) «Do you agree or disagree? Mark on the scale 1–5 and explain to your partner.»
+(3 утверждения по теме — шкала Лайкерта)
+
+ЧАСТЬ 2 — LANGUAGE PREPARATION:
+Дай 4 функциональных блока фраз (по 4–5 выражений каждый):
+- Expressing and justifying opinion
+- Agreeing (fully and partially)
+- Disagreeing politely
+- Asking for clarification / seeking more detail
+
+Задание: «Practice saying each phrase aloud. Which feel natural? Which are new for you?»
+
+ЧАСТЬ 3 — DISCUSSION ROLES:
+Дай 4–5 ролевых карточек для дискуссии:
+- Chair / Moderator
+- Devil's Advocate
+- Questioner
+- Summariser
+- Observer (fills in language feedback sheet)
+
+ЧАСТЬ 4 — DISCUSSION TASK (10–12 мин):
+Чёткая коммуникативная задача с outcome (чего должна достичь группа):
+Не просто «обсудите», а «придите к решению», «составьте топ-3», «убедите оппонента».
+
+ЧАСТЬ 5 — DEBRIEF:
+3 reflection вопроса: 1 content-based, 1 language-based, 1 skills-based.
+Observer feedback sheet: 6 критериев наблюдения (participation / fluency / accuracy / use of target vocab/grammar / turn-taking / listening).`}
+  },
+  {
+    emoji:'🎭', name:'Roleplay & Simulation',
+    desc:'Аутентичные роли, реальные коммуникативные ситуации, scaffolded language support.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, специализирующийся на drama-based и experiential learning.
+
+${ctx(data)}
+
+ЗАДАЧА: Создать Roleplay & Simulation по теме «${data.topic}».
+
+СЦЕНАРИЙ:
+Разработай реалистичную коммуникативную ситуацию по теме «${data.topic}» (уровень ${data.level}).
+Ситуация должна: иметь конфликт / разные точки зрения / неполную информацию у каждой стороны.
+
+РОЛЕВЫЕ КАРТОЧКИ (3–4 роли):
+Для каждой роли:
+- Кто вы (имя, должность, позиция)
+- Что вы хотите добиться (goal)
+- Что вы НЕ готовы принять (bottom line)
+- 2–3 факта / аргумента ТОЛЬКО у вас (не у других)
+- Эмоциональное состояние / тон общения
+
+LANGUAGE PREPARATION:
+Функциональные фразы для данной ситуации (${data.length}):
+- Opening the conversation / introducing yourself
+- Stating your position firmly but politely
+- Negotiating / compromising
+- Closing / summarising agreement or disagreement
+
+Включи: ${data.vocab} — как слова, которые ОБЯЗАТЕЛЬНО нужно использовать в ролплее.
+
+ПРОЦЕДУРА:
+1. Preparation time: 3–5 мин (прочитать карточку, подготовить аргументы).
+2. Roleplay: 8–12 мин.
+3. Debrief из роли: «What did you agree on? What was your main argument?»
+4. Meta-reflection вне роли: «Was this situation realistic? What would you do differently?»
+
+OBSERVER SHEET:
+Для тех, кто наблюдает — checklist (10 пунктов): communicative success / language use / strategy use.
+
+EXTENSION: «Write a follow-up email summarising the outcome of the meeting.» (связь со writing)`}
+  },
+  {
+    emoji:'🎤', name:'Презентация и монолог',
+    desc:'Структурированный монолог: подготовленный и неподготовленный. Техники публичной речи.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL и тренер по публичным выступлениям на иностранном языке.
+
+${ctx(data)}
+
+ЗАДАЧА: Создать задание на монологическую речь (prepared & unprepared speaking) по теме «${data.topic}».
+
+БЛОК A — PREPARED SPEAKING (подготовленный монолог):
+
+1. TOPIC CARD:
+Карточка с темой, точкой зрения и 3 bullet points-подсказками для структуры.
+«You have 2 minutes to prepare. Then speak for 2–3 minutes.»
+Дай 3 варианта карточек (разные подтемы в рамках «${data.topic}»).
+
+2. STRUCTURE FRAMEWORK:
+Шаблон монолога для уровня ${data.level}:
+- Opening hook (вопрос / цитата / факт / анекдот)
+- Main point 1 + supporting detail/example
+- Main point 2 + supporting detail/example
+- Counterargument (optional для ${data.level})
+- Conclusion + personal statement
+
+3. LANGUAGE SUPPORT BOX:
+Фразы для: начала / перехода / иллюстрации / обобщения / завершения.
+Включи целевую лексику: ${data.vocab} и конструкции ${data.grammar}.
+
+БЛОК B — UNPREPARED SPEAKING (экспромт):
+
+«Hot seat» вопросы (10 штук — от лёгких к сложным по теме «${data.topic}»).
+Правило: 10 секунд на обдумывание, затем говорить 30–60 секунд без остановки.
+
+Стратегии для «купить время»:
+- Fillers & hesitation devices (уровень ${data.level})
+- Что делать если «потерял мысль»
+
+ОЦЕНОЧНАЯ РУБРИКА (speaking assessment):
+5 критериев × 5 баллов с дескрипторами каждого уровня:
+- Communicative Achievement
+- Organisation
+- Language Range
+- Accuracy
+- Pronunciation & Fluency`}
+  },
+  {
+    emoji:'🔁', name:'Fluency Building Activities',
+    desc:'4/3/2, running dictation, back-to-back speaking — задания на скорость и бегло речи.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, специалист по fluency development (Nation, Thornbury).
+
+${ctx(data)}
+
+ЗАДАЧА: Создать набор Fluency Building Activities по теме «${data.topic}».
+
+АКТИВНОСТЬ 1 — 4/3/2 ACTIVITY:
+Принцип: один и тот же монолог трижды — за 4 мин, потом за 3 мин, потом за 2 мин (разным партнёрам).
+Подготовь:
+- 3 варианта topic cards по «${data.topic}» (уровень ${data.level})
+- Instruction sheet для учеников
+- Reflection questions: «Did you feel more fluent? What did you cut? What did you add?»
+
+АКТИВНОСТЬ 2 — INFORMATION TRANSFER SPEAKING:
+Дай ученику визуальный stimulus (опиши его подробно в тексте) — диаграмму / таблицу / карту / timeline по теме «${data.topic}».
+Задача: описать stimulus партнёру за 90 секунд (партнёр не видит, делает набросок).
+Потом партнёр задаёт уточняющие вопросы.
+Включи: ${data.vocab} — как vocabulary that must be used.
+
+АКТИВНОСТЬ 3 — ORAL SUMMARY RELAY:
+Прочитать / прослушать текст → пересказать партнёру → партнёр пересказывает другому → сравнить с оригиналом.
+Дай мини-текст (100–120 слов) по теме «${data.topic}» + discussion questions о том, что «потерялось».
+
+АКТИВНОСТЬ 4 — TOPIC TENNIS:
+Два игрока говорят по очереди по 1 предложению по теме «${data.topic}».
+Нельзя: молчать более 3 сек / повторять уже сказанное / уйти от темы.
+Правила + 5 стартовых тем.
+
+АКТИВНОСТЬ 5 — SPEED SPEAKING CHALLENGE:
+Говори 1 минуту без остановки на тему [topic card].
+Round 2: то же самое, но используй минимум 5 слов из ${data.vocab}.
+Round 3: включи ${data.grammar} минимум 3 раза.
+Партнёр считает использования целевых элементов.`}
+  },
+  {
+    emoji:'🎙️', name:'Pronunciation & Intonation Focus',
+    desc:'Работа с произношением: связанная речь, интонация, ударение, чистка типичных ошибок.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL и специалист по фонетике и pronunciation teaching.
+
+${ctx(data)}
+
+ЗАДАЧА: Создать задание Pronunciation & Intonation Focus для уровня ${data.level}, темы «${data.topic}».
+
+БЛОК 1 — PROBLEM SOUNDS & WORDS:
+Для лексики ${data.vocab} + типичных слов темы «${data.topic}»:
+- Выдели 8–10 слов с потенциально сложным произношением для уровня ${data.level}.
+- Транскрипция + описание типичной ошибки (в чём именно сложность для русскоязычных).
+- Минимальные пары: по 2 пары для проблемных звуков.
+
+БЛОК 2 — WORD STRESS:
+15 многосложных слов из темы. Задание: «Mark the stressed syllable.»
+Правила stress shift для данных словообразовательных паттернов (noun/verb stress, suffix patterns).
+Задание: «Do the stress patterns change in these word families?» (5 семей слов).
+
+БЛОК 3 — CONNECTED SPEECH:
+Объясни 4 явления с примерами из темы «${data.topic}»:
+1. Linking (consonant–vowel): примеры из текста
+2. Elision (dropping sounds): примеры
+3. Assimilation: примеры
+4. Weak forms (function words): примеры
+
+Задание: «Listen / read aloud. Mark where linking, elision or weak forms occur.»
+
+БЛОК 4 — INTONATION & MEANING:
+5 пар предложений — одинаковые слова, разная интонация = разный смысл.
+«How does the meaning change?» (удивление / сарказм / вопрос / подтверждение).
+Практика в парах: говорим с разными интонациями.
+
+БЛОК 5 — READ ALOUD PRACTICE:
+Текст 100–120 слов по теме «${data.topic}».
+Пронумерованные breath groups.
+Указания: где делать паузу / где связывать / какие слова ударные / где тон повышается.
+Задание: отрепетировать и прочитать вслух максимально естественно.`}
+  },
+  {
+    emoji:'🤝', name:'Task-Based Speaking (TBL)',
+    desc:'Реальная коммуникативная задача с gap — решение проблемы, принятие решения, согласование.',
+    buildPrompt(data){ return `РОЛЬ: Ты — методист EFL/ESL, следующий Task-Based Language Teaching approach (Willis, Ellis).
+
+${ctx(data)}
+
+ЗАДАЧА: Создать полноценный TBL Speaking Lesson по теме «${data.topic}».
+
+PRE-TASK PHASE:
+
+1. Topic introduction (3–5 мин):
+Активирующий вопрос / короткий текст / статистика по теме «${data.topic}».
+«Have you ever…? What would you do if…?»
+
+2. Task preview:
+Объясни задачу в общих чертах: «You will need to [решить проблему / принять решение / что-то согласовать].»
+«Think about useful language you might need.»
+
+TASK PHASE (основная задача):
+
+Разработай одну из следующих task-types (выбери по теме «${data.topic}»):
+A) PROBLEM-SOLVING: группе нужно найти решение конкретной проблемы.
+B) DECISION-MAKING: выбрать один из 4–5 вариантов, обосновать.
+C) RANKING: расставить по важности, прийти к консенсусу.
+D) DESIGN TASK: придумать / спланировать что-то.
+
+Материалы задачи:
+- Чёткое описание ситуации (120–150 слов)
+- Все необходимые данные / варианты / ограничения
+- Information cards (если нужна информация gap)
+- Outcome: что именно нужно «сдать» в конце (решение / план / презентация / список)
+
+LANGUAGE FOCUS PHASE (после задачи):
+
+«What language did you need? What was difficult to express?»
+Учитель выводит 6–8 полезных фраз, возникших или нужных в задаче.
+Mini-practice: «Can you use these phrases to express your decision?»
+
+POST-TASK PHASE:
+
+Repeat task (с другим партнёром или с language support) — флюэнси улучшается при повторении.
+Report: одна пара / группа представляет своё решение классу.
+Reflection: «What did you find hardest? What would you say differently next time?»
+
+TEACHER'S NOTES:
+- Как мониторить задачу без прерывания.
+- Что записывать для feedback on form.
+- Как провести Language Focus post-task.`}
+  },
+],
+
+}; // end TASKS
+
+// ═══════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════
+function renderTab(tab) {
+  const grid = $('grid-' + tab);
+  if (!grid) return;
+  grid.innerHTML = TASKS[tab].map((t,i) => `
+    <div class="task-card">
+      <div class="tc-head">
+        <div class="tc-icon">${t.emoji}</div>
+        <div class="tc-meta">
+          <div class="tc-name">${t.name}</div>
+          <span class="tc-badge badge-${tab}">${TAB_LABELS[tab]}</span>
+        </div>
+      </div>
+      <div class="tc-desc">${t.desc}</div>
+      <div class="tc-footer">
+        <button class="btn-gen btn-gen-${tab}" onclick="showPrompt('${tab}',${i})">
+          ✨ Создать промпт
+        </button>
+      </div>
+    </div>`).join('');
+}
+
+const TAB_LABELS = {
+  reading:'📖 Чтение', writing:'✍️ Письмо',
+  vocab:'📚 Лексика', grammar:'⚙️ Грамматика', speaking:'🗣️ Спикинг'
+};
+
+const TABS = ['reading','writing','vocab','grammar','speaking'];
+TABS.forEach(renderTab);
+
+// ═══════════════════════════════════════════════════
+//  TAB SWITCH
+// ═══════════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.skill-tab').forEach(b => b.classList.remove('active'));
+  $('tab-' + name).classList.add('active');
+  document.querySelector(`.skill-tab[data-tab="${name}"]`).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════
+//  PROMPT MODAL
+// ═══════════════════════════════════════════════════
+function showPrompt(tab, idx) {
+  const task = TASKS[tab][idx];
+  const data = d();
+  const text = task.buildPrompt(data);
+  $('pm-title').innerHTML = `${task.emoji} ${task.name}`;
+  $('pm-body').textContent = text;
+  $('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  $('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  const btn = $('btn-copy-pm');
+  btn.textContent = '📋 Копировать';
+  btn.classList.remove('copied');
+}
+
+function closeOverlay(e) {
+  if (e.target === $('overlay')) closeModal();
+}
+
+function copyPrompt() {
+  navigator.clipboard.writeText($('pm-body').textContent).then(() => {
+    const btn = $('btn-copy-pm');
+    btn.textContent = '✅ Скопировано!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Копировать'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ═══════════════════════════════════════════════════
+//  LANGUAGE PILLS
+// ═══════════════════════════════════════════════════
+$('lang-grid').addEventListener('click', e => {
+  const pill = e.target.closest('.lang-pill');
+  if (!pill) return;
+  document.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  selectedLang = pill.dataset.lang;
+  $('lang-custom-wrap').classList.toggle('on', selectedLang === '__custom__');
+});
+</script>
+</body>
+</html>
